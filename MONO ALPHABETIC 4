@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define ALPHABET_SIZE 26
+
+// Structure to store letter frequency information
+typedef struct {
+    char letter;
+    int frequency;
+} LetterFrequency;
+
+// Function to calculate letter frequencies in the given text
+void calculateLetterFrequencies(const char *text, LetterFrequency *frequency) {
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        frequency[i].letter = 'A' + i;
+        frequency[i].frequency = 0;
+    }
+
+    int textLength = strlen(text);
+    for (int i = 0; i < textLength; i++) {
+        char currentChar = toupper(text[i]);
+        if (isalpha(currentChar)) {
+            frequency[currentChar - 'A'].frequency++;
+        }
+    }
+}
+
+// Function to sort letter frequencies in descending order
+void sortLetterFrequencies(LetterFrequency *frequency) {
+    for (int i = 0; i < ALPHABET_SIZE - 1; i++) {
+        for (int j = i + 1; j < ALPHABET_SIZE; j++) {
+            if (frequency[i].frequency < frequency[j].frequency) {
+                // Swap frequencies and corresponding letters
+                LetterFrequency temp = frequency[i];
+                frequency[i] = frequency[j];
+                frequency[j] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    const char *ciphertext = "URYYB JBEYQ";
+    LetterFrequency letterFrequency[ALPHABET_SIZE];
+
+    calculateLetterFrequencies(ciphertext, letterFrequency);
+    sortLetterFrequencies(letterFrequency);
+
+    printf("Ciphertext: %s\n", ciphertext);
+    printf("Letter Frequencies:\n");
+
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        printf("%c: %d\n", letterFrequency[i].letter, letterFrequency[i].frequency);
+    }
+
+    return 0;
+}
