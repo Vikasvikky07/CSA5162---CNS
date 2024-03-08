@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdint.h>
+
+// Initial Permutation (IP) table
+int initial_permutation_table[] = {58, 50, 42, 34, 26, 18, 10, 2,
+                                   60, 52, 44, 36, 28, 20, 12, 4,
+                                   62, 54, 46, 38, 30, 22, 14, 6,
+                                   64, 56, 48, 40, 32, 24, 16, 8,
+                                   57, 49, 41, 33, 25, 17, 9, 1,
+                                   59, 51, 43, 35, 27, 19, 11, 3,
+                                   61, 53, 45, 37, 29, 21, 13, 5,
+                                   63, 55, 47, 39, 31, 23, 15, 7};
+
+// Example key (56 bits)
+uint64_t key = 0x133457799BBCDFF1;
+
+// Example plaintext (64 bits)
+uint64_t plaintext = 0x0123456789ABCDEF;
+
+// Helper function for applying the initial permutation
+uint64_t apply_initial_permutation(uint64_t input) {
+    uint64_t result = 0;
+    for (int i = 0; i < 64; i++) {
+        result |= ((input >> (64 - initial_permutation_table[i])) & 0x01) << (63 - i);
+    }
+    return result;
+}
+
+// DES encryption function
+void des_encrypt(uint64_t plaintext, uint64_t key, uint64_t *ciphertext) {
+    // Apply initial permutation
+    uint64_t permuted_plaintext = apply_initial_permutation(plaintext);
+
+    // Key schedule and 16 rounds of Feistel network (not implemented in this example)
+
+    // Final permutation (not implemented in this example)
+
+    // Assign the ciphertext to the output
+    *ciphertext = permuted_plaintext;
+}
+
+int main() {
+    uint64_t ciphertext;
+    
+    // Print the plaintext
+    printf("Plaintext: 0x%016llx\n", plaintext);
+
+    // Encrypt the plaintext
+    des_encrypt(plaintext, key, &ciphertext);
+
+    // Print the ciphertext
+    printf("Ciphertext: 0x%016llx\n", ciphertext);
+
+    return 0;
+}
