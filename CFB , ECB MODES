@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/des.h>
+
+void des_encrypt_ecb(const unsigned char *plaintext, const unsigned char *key, unsigned char *ciphertext) {
+    DES_key_schedule schedule;
+    DES_set_key((DES_cblock *)key, &schedule);
+    DES_ecb_encrypt((DES_cblock *)plaintext, (DES_cblock *)ciphertext, &schedule, DES_ENCRYPT);
+}
+
+void des_decrypt_ecb(const unsigned char *ciphertext, const unsigned char *key, unsigned char *plaintext) {
+    DES_key_schedule schedule;
+    DES_set_key((DES_cblock *)key, &schedule);
+    DES_ecb_encrypt((DES_cblock *)ciphertext, (DES_cblock *)plaintext, &schedule, DES_DECRYPT);
+}
+
+void des_encrypt_cbc(const unsigned char *plaintext, const unsigned char *key, const unsigned char *iv, unsigned char *ciphertext, int length) {
+    DES_key_schedule schedule;
+    DES_set_key((DES_cblock *)key, &schedule);
+    DES_cblock ivec;
+    memcpy(ivec, iv, 8);
+    DES_ncbc_encrypt(plaintext, ciphertext, length, &schedule, &ivec, DES_ENCRYPT);
+}
+
+void des_decrypt_cbc(const unsigned char *ciphertext, const unsigned char *key, const unsigned char *iv, unsigned char *plaintext, int length) {
+    DES_key_schedule schedule;
+    DES_set_key((DES_cblock *)key, &schedule);
+    DES_cblock ivec;
+    memcpy(ivec, iv, 8);
+    DES_ncbc_encrypt(ciphertext, plaintext, length, &schedule, &ivec, DES_DECRYPT);
+}
+
+void des_encrypt_cfb(const unsigned char *plaintext, const unsigned char *key, const unsigned char *iv, unsigned char *ciphertext, int length) {
+    DES_key_schedule schedule;
+    DES_set_key((DES_cblock *)key, &schedule);
+    DES_cblock ivec;
+    memcpy(ivec, iv, 8);
+    DES_cfb_encrypt(plaintext, ciphertext, 8, length, &schedule, &ivec, DES_ENCRYPT);
+}
+
+void des_decrypt_cfb(const unsigned char *ciphertext, const unsigned char *key, const unsigned char *iv, unsigned char *plaintext, int length) {
+    DES_key_schedule schedule;
+    DES_set_key((DES_cblock *)key, &schedule);
+    DES_cblock ivec;
+    memcpy(ivec, iv, 8);
+    DES_cfb_encrypt(ciphertext, plaintext, 8, length, &schedule, &ivec, DES_DECRYPT);
+}
+
+int main() {
+    const unsigned char key[8] = "abcdefgh";
+    const unsigned char iv[8] = "ijklmnop";
+    const char *input = "HelloWorld";
+    int input_length = strlen(input);
+
+    // Pad the input if needed
+    int padding = 8 - (input_length % 8);
+    int padded_length = input_length + padding;
+    unsigned char *padded_input = (unsigned char *)malloc(padded_length);
+    strcpy((char *)padded_input, input);
+    memset(padded_input + input_length, 0, padding);
+
+    unsigned char ciphertext[padded_length];
+    unsigned char decrypted_text[padded_length];
+
+    // ECB Mode
+    des_encrypt_ecb(padded_input, key, ciphertext);
+    printf("ECB Encrypted Text: %s\n", ciphertext);
+
+    des_decrypt_ecb(ciphertext, key, decrypted_text);
+    printf("ECB Decrypted Text: %s\n", decrypted_text);
+
+    // CBC Mode
+    des_encrypt_cbc(padded_input, key, iv, ciphertext, padded_length);
+    printf("CBC Encrypted Text: %s\n", ciphertext);
+
+    des_decrypt_cbc(ciphertext, key, iv, decrypted_text, padded_length);
+    printf("CBC Decrypted Text: %s\n", decrypted_text);
+
+    // CFB Mode
+    des_encrypt_cfb(padded_input, key, iv, ciphertext, padded_length);
+    printf("CFB Encrypted Text: %s\n", ciphertext);
+
+    des_decrypt_cfb(ciphertext, key, iv, decrypted_text, padded_length);
+    printf("CFB Decrypted Text: %s\n", decrypted_text);
+
+    free(padded_input);
+
+    return 0;
+}
