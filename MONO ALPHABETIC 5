@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define ALPHABET_SIZE 26
+
+void countLetterFrequency(const char *text, int *frequency) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (isalpha(text[i])) {
+            char letter = tolower(text[i]);
+            frequency[letter - 'a']++;
+        }
+    }
+}
+
+void decryptMonoalphabeticSubstitution(const char *ciphertext, const char *key, char *plaintext) {
+    for (int i = 0; ciphertext[i] != '\0'; i++) {
+        if (isalpha(ciphertext[i])) {
+            char letter = tolower(ciphertext[i]);
+            int index = key[letter - 'a'] - 'a';
+            plaintext[i] = isupper(ciphertext[i]) ? 'A' + index : 'a' + index;
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+}
+
+int compareFrequency(const void *a, const void *b) {
+    return (*(int *)b - *(int *)a);
+}
+
+void performFrequencyAnalysis(const char *ciphertext, int topResults) {
+    int frequency[ALPHABET_SIZE] = {0};
+    countLetterFrequency(ciphertext, frequency);
+
+    int sortedFrequency[ALPHABET_SIZE];
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        sortedFrequency[i] = frequency[i];
+    }
+
+    // Sort the frequency array in descending order
+    qsort(sortedFrequency, ALPHABET_SIZE, sizeof(int), compareFrequency);
+
+    // Print the letter frequencies
+    printf("Letter Frequencies:\n");
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        char letter = 'a' + (frequency[i] - sortedFrequency[0] + ALPHABET_SIZE) % ALPHABET_SIZE;
+        printf("%c: %d\n", letter, frequency[i]);
+    }
+
+    // Generate a possible key based on frequency analysis
+    char key[ALPHABET_SIZE];
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        key[sortedFrequency[i] - 'a'] = 'a' + i;
+    }
+
+    // Perform decryption attempts using the possible key
+    printf("\nTop %d Possible Decryption Attempts:\n", topResults);
+    for (int i = 0; i < topResults; i++) {
+        char plaintext[strlen(ciphertext)];
+        decryptMonoalphabeticSubstitution(ciphertext, key, plaintext);
+        printf("Attempt %d: %s\n", i + 1, plaintext);
+
+        // Rotate the key for the next attempt
+        char temp = key[0];
+        for (int j = 0; j < ALPHABET_SIZE - 1; j++) {
+            key[j] = key[j + 1];
+        }
+        key[ALPHABET_SIZE - 1] = temp;
+    }
+}
+
+int main() {
+    const char *ciphertext = "Wklv lv d whvw phvvdjh.";
+
+    printf("Ciphertext: %s\n\n", ciphertext);
+
+    performFrequencyAnalysis(ciphertext, 3);  // Specify the top 3 possible plaintexts
+
+    return 0;
+}
